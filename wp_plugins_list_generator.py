@@ -5,9 +5,6 @@ def get_plugins_list(wp_path, status='active,inactive', response=False):
     json_response = os.popen('wp plugin list --path=' + wp_path + ' --format=json --fields=name,status,update,version,update_version,title,description --status=' + status)
     output = json.load(json_response)
 
-    for plugin in output:
-        plugin['link'] = 'https://ru.wordpress.org/plugins/'+plugin['name']
-
     plugin_list = ['Plugin | Is active? | Version','---|:---:|:---:']
 
     with open('wp_list', 'w') as outfile:
@@ -29,5 +26,22 @@ def get_plugins_list(wp_path, status='active,inactive', response=False):
         joined = '\n'.join(plugin_list)
         outfile.write(joined)
 
-get_plugins_list('/home/qzya/www/lyson.loc', 'active')
+def get_themes_list(wp_path, status=False):
+    json_response = os.popen('wp theme list --path=' + wp_path + ' --format=json --fields=name,status,update,version,update_version,title ' + (('--status=' + status) if status else ''))
+    
+    output = json.load(json_response)
+
+    theme_list = ['Theme | Is active? | Version','---|:---:|:---:']
+
+    for theme in output: 
+        # pprint(theme)
+        # pprint(theme['title'] + ' ' + theme['status'] + ' ' + theme['update'] + ' ' + (( " *(New version available: " + theme['update_version'] + ")*" ) if theme['update_version'] else ''))
+        theme_list.append( theme['title'] + (( " *(New version available: " + theme['update_version'] + ")*" ) if theme['update_version'] else '') + "|" + theme['status'] + "|" + theme['version'])
+    
+    pprint(theme_list)
+
+# get_plugins_list('/home/qzya/www/lyson.loc', 'active')
+
+get_themes_list('/home/qzya/www/lyson.loc')
+
 
