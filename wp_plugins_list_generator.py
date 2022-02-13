@@ -1,16 +1,28 @@
 import os, json, requests
-from pprint import pprint
+from sys import argv
+
+response = False
+wp_path = '.'
+
+if len(argv) > 1 :
+    wp_path = argv[1]
+
+if len(argv) > 2:
+    if (argv[2] == 'True' or argv[2] == '1'):
+        response = bool(argv[2])
+
+def get_wp_info(wp_path):
+    return '## ' + os.popen('wp option get blogname --path=' + wp_path).read() + '*' + os.popen('wp option get blogdescription --path=' + wp_path).read().strip('\n') + '*\n' + '### Current WordPress version: ' + os.popen('wp core version --path=' + wp_path ).read() + '\n'
 
 def get_plugins_list(wp_path, status='active,inactive', response=False):
     json_response = os.popen('wp plugin list --path=' + wp_path + ' --format=json --fields=name,status,update,version,update_version,title,description --status=' + status)
     output = json.load(json_response)
-
-    plugin_list = ['Plugin | Is active? | Version','---|:---:|:---:']
+    plugin_list = ['\nPlugin | Is active? | Version','---|:---:|:---:']
 
     for plugin in output:
         if (response):
-            response = requests.get("https://ru.wordpress.org/plugins/" + plugin['name'])
-            if 'shortlink' in response.links:
+            plink_response = requests.get("https://ru.wordpress.org/plugins/" + plugin['name'])
+            if 'shortlink' in plink_response.links:
                 md_link = "[" + plugin['title'] + "](" + "https://ru.wordpress.org/plugins/" + plugin['name'] + " '" + plugin['name'] + "')" + (( " *(Available new version: " + plugin['update_version'] + ")*" ) if plugin['update_version'] else '')
             else:
                 md_link = plugin['title']
@@ -28,16 +40,15 @@ def get_themes_list(wp_path, status=False):
     json_response = os.popen('wp theme list --path=' + wp_path + ' --format=json --fields=name,status,update,version,update_version,title ' + (('--status=' + status) if status else ''))
     
     output = json.load(json_response)
-
-    theme_list = ['Theme | Is active? | Version','---|:---:|:---:']
+    
+    theme_list = ['\nTheme | Is active? | Version','---|:---:|:---:']
 
     for theme in output: 
         theme_list.append( theme['title'] + (( " *(New version available: " + theme['update_version'] + ")*" ) if theme['update_version'] else '') + "|" + theme['status'] + "|" + theme['version'])
-    
-    return '\n'.join(theme_list)
+
+    return '\n'.join(theme_list) + '\n'
 
 with open('wp_info.md', 'w') as outfile:
-
-    outfile.write(get_themes_list('/home/qzya/www/lyson.loc', 'active,parent'))
-    outfile.write('\n---\n')
-    outfile.write(get_plugins_list('/home/qzya/www/lyson.loc', 'active'))
+    outfile.write(get_wp_info(wp_path))
+    outfile.write(get_themes_list(wp_path, 'active,parent'))
+    outfile.write(get_plugins_list(wp_path, 'active', response))
