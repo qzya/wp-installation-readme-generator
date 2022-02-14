@@ -1,4 +1,4 @@
-import os, json, requests
+import os, json, time, requests
 from sys import argv
 
 response = False
@@ -12,7 +12,7 @@ if len(argv) > 2:
         response = bool(argv[2])
 
 def get_wp_info(wp_path):
-    return '## ' + os.popen('wp option get blogname --path=' + wp_path).read() + '*' + os.popen('wp option get blogdescription --path=' + wp_path).read().strip('\n') + '*\n' + '### Current WordPress version: ' + os.popen('wp core version --path=' + wp_path ).read() + '\n'
+    return '*This readme generated ' + time.strftime('%d.%m.%Y %H:%M:%S') + '<br>Current WordPress version: ' + os.popen('wp core version --path=' + wp_path ).read().strip() + '*\n\n# ' + os.popen('wp option get blogname --path=' + wp_path).read() + '\n*' + os.popen('wp option get blogdescription --path=' + wp_path).read().strip('\n') + '*\n\n' 
 
 def get_plugins_list(wp_path, status='active,inactive', response=False):
     json_response = os.popen('wp plugin list --path=' + wp_path + ' --format=json --fields=name,status,update,version,update_version,title,description --status=' + status)
@@ -34,7 +34,7 @@ def get_plugins_list(wp_path, status='active,inactive', response=False):
         md_description = plugin['description']
         plugin_list.append( md_link + "<br>" + md_description.replace('\n', ' ') + "|" + md_status + "|" + md_version + "|" )
 
-    return '\n'.join(plugin_list)
+    return '\n'.join(plugin_list) + '\n'
 
 def get_themes_list(wp_path, status=False):
     json_response = os.popen('wp theme list --path=' + wp_path + ' --format=json --fields=name,status,update,version,update_version,title ' + (('--status=' + status) if status else ''))
@@ -48,7 +48,9 @@ def get_themes_list(wp_path, status=False):
 
     return '\n'.join(theme_list) + '\n'
 
-with open('wp_info.md', 'w') as outfile:
+with open('wp-readme.md', 'w') as outfile:
     outfile.write(get_wp_info(wp_path))
+    outfile.write('### Theme: ')
     outfile.write(get_themes_list(wp_path, 'active,parent'))
+    outfile.write('### List of plugins: ')
     outfile.write(get_plugins_list(wp_path, 'active', response))
