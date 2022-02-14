@@ -53,4 +53,4 @@ with open('wp-readme.md', 'w') as outfile:
     outfile.write('### Theme: ')
     outfile.write(get_themes_list(wp_path, 'active,parent'))
     outfile.write('### List of plugins: ')
-    outfile.write(get_plugins_list(wp_path, 'active', response))
+    outfile.write(get_plugins_list(wp_path, 'active,inactive', response))
