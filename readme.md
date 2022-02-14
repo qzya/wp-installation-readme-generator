@@ -1,6 +1,6 @@
 # WordPress installation readme generator
 
-Python script generates github readme markdown file for WordPress site repositories (see [wp-readme.md](wp-readme.md) for example).<br>
+Python script generates github readme markdown file for WordPress site repositories (see [wp-readme-example.md](wp-readme-example.md)).<br>
 Creates pretty plugins and themes lists.
 
 :exclamation: Needs installed python, [wp-cli](https://github.com/wp-cli/wp-cli) and working WordPress installation (with connected and working database). :exclamation:
